@@ -16,18 +16,16 @@ from PIL import Image
 from utils import *
 
 N_CLASSES = 20
-DATA_DIR = './datasets/CIHP/images'
-PARSING_DIR = './output'
 RESTORE_FROM = './checkpoint/CIHP_pgn'
 
-def main():
+def main(data_dir):
     """Create the model and start the evaluation process."""
     
     # Create queue coordinator.
     coord = tf.train.Coordinator()
     # Load reader.
     with tf.name_scope("create_inputs"):
-        reader = ImageReader(DATA_DIR, None, None, None, False, False, False, coord)
+        reader = ImageReader(os.path.join(data_dir, 'frames'), None, None, None, False, False, False, coord)
         image = reader.image
         image_rev = tf.reverse(image, tf.stack([1]))
         image_list = reader.image_list
@@ -135,7 +133,7 @@ def main():
     threads = tf.train.start_queue_runners(coord=coord, sess=sess)
 
     # evaluate prosessing
-    parsing_dir = PARSING_DIR
+    parsing_dir = os.path.join(data_dir, 'segmentations')
     if not os.path.exists(parsing_dir):
         os.makedirs(parsing_dir)
     # Iterate over training steps.
@@ -147,15 +145,18 @@ def main():
         
         msk = decode_labels(parsing_, num_classes=N_CLASSES)
         parsing_im = Image.fromarray(msk[0])
-        parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
-        cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
+        parsing_im.save('{}/{}.png'.format(parsing_dir, img_id))
 
     coord.request_stop()
     coord.join(threads)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dir', type=str, help="dataset dir")
+
+    args = parser.parse_args()
+    main(args.dir)
 
 
 ##############################################################333
