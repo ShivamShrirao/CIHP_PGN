@@ -1,3 +1,4 @@
+from glob import glob
 import os
 
 import numpy as np
@@ -173,17 +174,15 @@ def read_images_from_disk(input_queue, input_size, random_scale, random_mirror=F
     """
 
     img_contents = tf.read_file(input_queue[0])
-    label_contents = tf.read_file(input_queue[1])
-    edge_contents = tf.read_file(input_queue[2])
-
     
     img = tf.image.decode_jpeg(img_contents, channels=3)
     img_r, img_g, img_b = tf.split(value=img, num_or_size_splits=3, axis=2)
     img = tf.cast(tf.concat([img_b, img_g, img_r], 2), dtype=tf.float32)
     # Extract mean.
     img -= IMG_MEAN
-    label = tf.image.decode_png(label_contents, channels=1)
-    edge = tf.image.decode_png(edge_contents, channels=1)
+    img = tf.image.resize_images(img, tf.stack([tf.to_int32(270), tf.to_int32(270)]))
+    label = None
+    edge = None
 
     if input_size is not None:
         h, w = input_size
@@ -226,14 +225,10 @@ class ImageReader(object):
         self.input_size = input_size
         self.coord = coord
 
-
-        self.image_list, self.label_list = read_labeled_image_list(self.data_dir, self.data_list)
-        self.edge_list = read_edge_list(self.data_dir, self.data_id_list)
+        self.image_list = glob(os.path.join(self.data_dir, '*.jpg'))
         self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
-        self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
-        self.edges = tf.convert_to_tensor(self.edge_list, dtype=tf.string)
-        self.queue = tf.train.slice_input_producer([self.images, self.labels, self.edges], shuffle=shuffle) 
-        self.image, self.label, self.edge = read_images_from_disk(self.queue, self.input_size, random_scale, random_mirror) 
+        self.queue = tf.train.slice_input_producer([self.images], shuffle=shuffle)
+        self.image, _, _ = read_images_from_disk(self.queue, self.input_size, random_scale, random_mirror)
 
     def dequeue(self, num_elements):
         '''Pack images and labels into a batch.
