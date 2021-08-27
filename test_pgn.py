@@ -107,8 +107,7 @@ def main(data_dir):
     raw_output_all = tf.expand_dims(raw_output_all, dim=0)
     raw_output_all = tf.argmax(raw_output_all, axis=3)
     pred_all = tf.expand_dims(raw_output_all, dim=3) # Create 4-d tensor.
-    pred_all = tf.image.resize_images(pred_all, tf.stack([tf.to_int32(1080), tf.to_int32(1080)]), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-
+    # pred_all = tf.image.resize_images(pred_all, tf.stack([tf.to_int32(1080), tf.to_int32(1080)]), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
 
     # Which variables to load.
     restore_var = tf.global_variables()
@@ -145,7 +144,8 @@ def main(data_dir):
         
         msk = decode_labels(parsing_, num_classes=N_CLASSES)
         parsing_im = Image.fromarray(msk[0])
-        parsing_im.save('{}/{}.png'.format(parsing_dir, img_id))
+        parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
+        cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
 
     coord.request_stop()
     coord.join(threads)
