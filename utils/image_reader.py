@@ -225,7 +225,7 @@ class ImageReader(object):
         self.input_size = input_size
         self.coord = coord
 
-        self.image_list = glob(os.path.join(self.data_dir, '*.jpg'))
+        self.image_list = glob(os.path.join(self.data_dir, '*.png'))
         self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
         self.queue = tf.train.slice_input_producer([self.images], shuffle=shuffle)
         self.image, _, _ = read_images_from_disk(self.queue, self.input_size, random_scale, random_mirror)
