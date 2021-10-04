@@ -14,6 +14,7 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 from utils import *
+from tqdm import tqdm
 
 N_CLASSES = 20
 RESTORE_FROM = './checkpoint/CIHP_pgn'
@@ -136,15 +137,15 @@ def main(data_dir):
     if not os.path.exists(parsing_dir):
         os.makedirs(parsing_dir)
     # Iterate over training steps.
-    for step in range(len(image_list)):
+    for step in tqdm(range(len(image_list))):
         parsing_ = sess.run(pred_all)
         print(image_list[step])
         img_split = image_list[step].split('/')
         img_id = img_split[-1][:-4]
         
-        msk = decode_labels(parsing_, num_classes=N_CLASSES)
-        parsing_im = Image.fromarray(msk[0])
-        parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
+        # msk = decode_labels(parsing_, num_classes=N_CLASSES)
+        # parsing_im = Image.fromarray(msk[0])
+        # parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
         cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
 
     coord.request_stop()
