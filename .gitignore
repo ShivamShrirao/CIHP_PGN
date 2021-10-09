@@ -3,3 +3,4 @@ output/
 logs/
 model/
 *.pyc
+datasets/
