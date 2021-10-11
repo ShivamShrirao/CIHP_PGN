@@ -142,7 +142,7 @@ def main(data_dir):
             parsing_ = sess.run(pred_all)
             pbar.set_postfix({'img': image_list[step]})
             img_split = image_list[step].split('/')
-            img_id = img_split[-1][:-4]
+            img_id = img_split[-1].split('.')[0]
             
             # msk = decode_labels(parsing_, num_classes=N_CLASSES)
             # parsing_im = Image.fromarray(msk[0])
