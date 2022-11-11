@@ -13,7 +13,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from utils import *
+from utils import ImageReader, PGNModel
 from tqdm import tqdm
 
 N_CLASSES = 20
@@ -26,7 +26,7 @@ def main(data_dir):
     coord = tf.train.Coordinator()
     # Load reader.
     with tf.name_scope("create_inputs"):
-        reader = ImageReader(os.path.join(data_dir, 'frames'), None, None, None, False, False, False, coord)
+        reader = ImageReader(os.path.join(data_dir, 'image'), None, None, None, False, False, False, coord)
         image = reader.image
         image_rev = tf.reverse(image, tf.stack([1]))
         image_list = reader.image_list
@@ -142,7 +142,7 @@ def main(data_dir):
             parsing_ = sess.run(pred_all)
             pbar.set_postfix({'img': image_list[step]})
             img_split = image_list[step].split('/')
-            img_id = img_split[-1].split('.')[0]
+            img_id = '.'.join(img_split[-1].split('.')[:-1])
             
             # msk = decode_labels(parsing_, num_classes=N_CLASSES)
             # parsing_im = Image.fromarray(msk[0])

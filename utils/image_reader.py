@@ -180,7 +180,7 @@ def read_images_from_disk(input_queue, input_size, random_scale, random_mirror=F
     img = tf.cast(tf.concat([img_b, img_g, img_r], 2), dtype=tf.float32)
     # Extract mean.
     img -= IMG_MEAN
-    img = tf.image.resize_images(img, tf.stack([tf.to_int32(512), tf.to_int32(384)]))
+    img = tf.image.resize_images(img, tf.stack([tf.to_int32(512), tf.to_int32(512)]))
     label = None
     edge = None
 
