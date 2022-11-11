@@ -1,19 +1,11 @@
 from __future__ import print_function
 import argparse
-from datetime import datetime
 import os
-import sys
-import time
-import scipy.misc
-import scipy.io as sio
 import cv2
-from glob import glob
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 import tensorflow as tf
-import numpy as np
-from PIL import Image
-from utils import ImageReader, PGNModel
+from utils import ImageReader, PGNModel, load
 from tqdm import tqdm
 
 N_CLASSES = 20
@@ -38,7 +30,7 @@ def main(data_dir):
     image_batch125 = tf.image.resize_images(image_batch, tf.stack([tf.to_int32(tf.multiply(h_orig, 1.25)), tf.to_int32(tf.multiply(w_orig, 1.25))]))
     image_batch150 = tf.image.resize_images(image_batch, tf.stack([tf.to_int32(tf.multiply(h_orig, 1.50)), tf.to_int32(tf.multiply(w_orig, 1.50))]))
     image_batch175 = tf.image.resize_images(image_batch, tf.stack([tf.to_int32(tf.multiply(h_orig, 1.75)), tf.to_int32(tf.multiply(w_orig, 1.75))]))
-         
+
     # Create network.
     with tf.variable_scope('', reuse=False):
         net_100 = PGNModel({'data': image_batch}, is_training=False, n_classes=N_CLASSES)
@@ -133,7 +125,7 @@ def main(data_dir):
     threads = tf.train.start_queue_runners(coord=coord, sess=sess)
 
     # evaluate prosessing
-    parsing_dir = os.path.join(data_dir, 'segmentations')
+    parsing_dir = os.path.join(data_dir, 'image-parse')
     if not os.path.exists(parsing_dir):
         os.makedirs(parsing_dir)
     # Iterate over training steps.
@@ -144,9 +136,6 @@ def main(data_dir):
             img_split = image_list[step].split('/')
             img_id = '.'.join(img_split[-1].split('.')[:-1])
             
-            # msk = decode_labels(parsing_, num_classes=N_CLASSES)
-            # parsing_im = Image.fromarray(msk[0])
-            # parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
             cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
 
     coord.request_stop()
@@ -156,7 +145,6 @@ def main(data_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dir', type=str, help="dataset dir")
-
     args = parser.parse_args()
     main(args.dir)
 
