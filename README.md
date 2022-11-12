@@ -1,3 +1,12 @@
+## Creating a new environment
+```bash
+conda create --name tf python==3.7
+conda activate tf
+conda install -c conda-forge tensorflow=1.15
+pip install Pillow matplotlib opencv-python numpy tqdm
+```
+
+
 ## Part Grouping Network (PGN)
 Ke Gong, Xiaodan Liang, Yicheng Li, Yimin Chen, Ming Yang and Liang Lin, "Instance-level Human Parsing via Part Grouping Network", ECCV 2018 (Oral).
 
